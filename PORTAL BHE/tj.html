@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datamex Student/Teacher Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Global Reset */
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Body Styling - Centers content and provides a background image */
+        body {
+            display: flex;
+            flex-direction: column; /* Allow vertical stacking of header, main, footer */
+            min-height: 100vh;
+            background-image: url('datamex.webp'); /* This assumes 'datamex.webp' is in the same folder as this HTML file */
+            background-size: cover; /* Cover the entire background */
+            background-position: center; /* Center the image */
+            background-repeat: no-repeat; /* Do not repeat the image */
+            background-attachment: fixed; /* Keeps background fixed during scroll (if content were longer) */
+            background-color: #333; /* Fallback background color if image fails to load */
+        }
+
+        /* Optional: Overlay for better readability of content over the background image */
+        body::before {
+            content: '';
+            position: fixed; /* Use fixed to cover entire viewport */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4); /* Semi-transparent black overlay (adjust alpha for darkness) */
+            z-index: -1; /* Place overlay behind the body content */
+        }
+
+        /* --- Login/Registration Form Area (initially visible) --- */
+        .auth-container {
+            display: flex; /* Flexbox to center the auth-box */
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1; /* Allows it to take up available space */
+            padding: 20px;
+            z-index: 1; /* Ensure auth box is above the overlay */
+        }
+
+        .auth-box {
+            position: relative;
+            width: 400px;
+            height: auto;
+            background: rgba(43, 45, 66, 0.9);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+            z-index: 1;
+        }
+
+        .auth-box form {
+            width: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .auth-box form.active {
+            display: flex;
+            opacity: 1;
+        }
+        .auth-box form:not(.active) {
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 40px;
+            width: 100%;
+        }
+
+        h2 {
+            font-size: 2em;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .input-box {
+            position: relative;
+            width: 100%;
+            margin: 25px 0;
+            border-bottom: 2px solid #fff;
+        }
+
+        .input-box input,
+        .input-box select {
+            width: calc(100% - 40px);
+            height: 50px;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-size: 1em;
+            color: #fff;
+            padding: 0 5px 0 0;
+            padding-left: 5px;
+        }
+
+        .input-box select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2C114.7L154.7%2C247.1c-1.6%2C1.6-3.6%2C2.4-5.6%2C2.4c-2%2C0-4-0.8-5.6-2.4L5.4%2C114.7c-3.2-3.2-3.2-8.3%2C0-11.5c3.2-3.2%2C8.3-3.2%2C11.5%2C0L149.2%2C229.4l132.8-132.8c3.2-3.2%2C8.3-3.2%2C11.5%2C0C290.2%2C106.4%2C290.2%2C111.5%2C287%2C114.7z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 1em;
+            padding-right: 30px;
+        }
+
+        .input-box select option {
+            background-color: #2b2d42;
+            color: #fff;
+        }
+
+        .input-box label {
+            position: absolute;
+            top: 50%;
+            left: 5px;
+            transform: translateY(-50%);
+            font-size: 1em;
+            color: #fff;
+            pointer-events: none;
+            transition: .5s;
+        }
+
+        .input-box input:focus ~ label,
+        .input-box input:valid ~ label,
+        .input-box select:focus ~ label,
+        .input-box select:valid ~ label {
+            top: -5px;
+            font-size: 0.8em;
+        }
+        /* For date input, adjust label position when value is present */
+        .input-box input[type="date"]:not([value=""]) ~ label {
+            top: -5px;
+            font-size: 0.8em;
+        }
+
+
+        .input-box .icon {
+            position: absolute;
+            right: 0;
+            color: #fff;
+            font-size: 1.2em;
+            line-height: 50px;
+        }
+
+        .remember-forgot {
+            margin: -10px 0 15px;
+            font-size: .9em;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .remember-forgot label input {
+            accent-color: #fff;
+            margin-right: 5px;
+        }
+
+        .remember-forgot a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .remember-forgot a:hover {
+            text-decoration: underline;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            height: 45px;
+            background: #007bff;
+            border: none;
+            outline: none;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 1em;
+            color: #fff;
+            font-weight: 600;
+            transition: .3s ease;
+            margin-top: 15px;
+        }
+
+        button[type="submit"]:hover {
+            background: #0056b3;
+        }
+
+        .switch-form-link {
+            font-size: .9em;
+            color: #fff;
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .switch-form-link p a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .switch-form-link p a:hover {
+            text-decoration: underline;
+        }
+
+        .auth-toggle {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            padding-bottom: 15px;
+        }
+
+        .auth-toggle button {
+            background: none;
+            border: none;
+            color: #040404;
+            font-size: 1.1em;
+            font-weight: 600;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+
+        .auth-toggle button.active {
+            background: #007bff;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+        }
+
+        .auth-toggle button:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        #authErrorMessage {
+            color: #ffcccc;
+            font-size: 0.9em;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+            width: 100%;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .radio-group input[type="radio"] {
+            width: auto;
+            margin-right: 5px;
+        }
+
+        .gender-select label {
+            position: static;
+            transform: none;
+            margin-right: 10px;
+            white-space: nowrap;
+        }
+
+        /* --- Portal Layout (hidden by default) --- */
+        .portal-main-container { /* New container for both portals */
+            display: none; /* Hidden until a user logs in */
+            width: 100%;
+            flex-direction: column; /* Stacks header, main, footer within portal */
+            flex-grow: 1; /* Take up available space */
+        }
+
+        .portal-main-container.active {
+            display: flex;
+        }
+
+        /* Specific for Student Portal */
+        #studentPortal header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        #studentPortal header h1 {
+            margin-left: 20px;
+        }
+
+        #studentPortal nav ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            margin-right: 20px;
+        }
+
+        #studentPortal nav ul li {
+            margin: 0 15px;
+        }
+
+        #studentPortal nav ul li a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 5px 0;
+            transition: border-bottom 0.3s ease;
+        }
+
+        #studentPortal nav ul li a:hover,
+        #studentPortal nav ul li a.active-link {
+            border-bottom: 2px solid #007bff;
+        }
+
+        #studentPortal main {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: #fbf9f9dc;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            flex-grow: 1; /* Allows main content to expand */
+        }
+
+        #studentPortal footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: black;
+            margin-top: 30px;
+        }
+
+        /* Section Styling for Portal */
+        .portal-section {
+            display: none; /* Hide all portal sections by default */
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #fdfbfb;
+            border-radius: 8px;
+            background-color: #f8f5f5;
+            color: #333;
+        }
+        .portal-section.active {
+            display: block; /* Show active portal section */
+        }
+        /* Nested sections within dashboard */
+        #dashboard .nested-section {
+            display: none;
+        }
+        #dashboard .nested-section.active {
+            display: block;
+        }
+        #dashboard .dashboard-nav {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        #dashboard .dashboard-nav a {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        #dashboard .dashboard-nav a:hover {
+            background-color: #0056b3;
+        }
+        .back-to-dashboard {
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Profile Display Specific Styles */
+        .profile-display-container {
+            background-color: #2b2d42;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            color: #0c0c0c;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .profile-display-container h3 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #f9f7f7;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 15px;
+        }
+
+        .profile-item {
+            display: flex;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed rgba(255,255,255,0.1);
+        }
+
+        .profile-item:last-child {
+            border-bottom: none;
+        }
+
+        .profile-item strong {
+            flex: 0 0 150px; /* Fixed width for labels */
+            color: #add8e6; /* Light blue for labels */
+        }
+
+        .profile-item span {
+            flex-grow: 1;
+            color: #fefbfb; /* White for values */
+        }
+
+        .profile-display-container .contact-help {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.9em;
+        }
+
+        .profile-display-container .contact-help a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        /* Message Display */
+        .message-display {
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+            display: none;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .message-display.success {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .message-display.error {
+            background-color: #f44336;
+            color: white;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+        .logout-button-student { /* Renamed for clarity */
+            background: none;
+            border: 1px solid rgb(255, 253, 253);
+            color: rgb(255, 251, 251);
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-left: 20px;
+            transition: background 0.3s ease;
+        }
+        .logout-button-student:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Teacher Portal Specific Styles (from techears_portal.html) */
+        .antialiased { /* This applies to the body in teacher's portal, but we'll adapt it */
+            font-family: 'Inter', sans-serif; /* Keep specific font for consistency if needed */
+        }
+        .teacher-portal-main-container { /* New class for teacher portal content */
+            min-height: 100vh;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            align-items: center;
+            padding: 4rem; /* Adjusted from p-4 sm:p-6 lg:p-8 */
+            background: linear-gradient(to bottom right, #e0f2fe, #bfdbfe); /* Background from teacher portal */
+        }
+        .teacher-portal-main-container.active {
+            display: flex;
+        }
+        .container-bg {
+            background-color: #ffffff;
+        }
+        .input-group label {
+            font-weight: 600;
+            color: #4b5563; /* Tailwind gray-600 */
+        }
+        .input-group input, .input-group select {
+            padding: 0.75rem;
+            border: 1px solid #d1d5db; /* Tailwind gray-300 */
+            border-radius: 0.5rem;
+            width: 100%;
+            transition: all 0.2s ease-in-out;
+        }
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #6366f1; /* Tailwind indigo-500 */
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        .action-button {
+            transition: all 0.2s ease-in-out;
+        }
+        #profile-pic-container, #student-profile-pic-container {
+            width: 3rem; /* 48px */
+            height: 3rem; /* 48px */
+            border-radius: 9999px; /* full rounded */
+            cursor: pointer;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #e2e8f0; /* Tailwind gray-200 */
+            border: 2px solid #a5b4fc; /* Tailwind indigo-300 */
+        }
+        #profile-pic, #student-profile-pic {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #profile-pic-svg, #student-profile-pic-svg {
+            width: 2rem; /* 32px */
+            height: 2rem; /* 32px */
+        }
+        #message-box-container-teacher { /* For teacher portal's custom message box */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+        }
+    </style>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+<body class="antialiased">
+    <div id="authContainer" class="auth-container">
+        <div class="auth-box">
+            <div class="auth-toggle">
+                <button id="showStudent" class="active">Student's</button>
+                <button id="showTeacher">Teacher's</button>
+            </div>
+
+            <form id="studentLoginForm" class="active">
+                <h2>Student Login</h2>
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="mail"></ion-icon></span>
+                    <input type="email" id="studentLoginEmail" required>
+                    <label for="studentLoginEmail">Email</label>
+                </div>
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
+                    <input type="password" id="studentLoginPassword" required>
+                    <label for="studentLoginPassword">Password</label>
+                </div>
+                <div class="remember-forgot">
+                    <label><input type="checkbox"> Remember me</label>
+                    <a href="#" class="forgot-password-link" data-user-type="student">Forgot Password?</a>
+                </div>
+                <button type="submit">Login</button>
+                <div class="switch-form-link">
+                    <p>Don't have an account? <a href="#" id="showStudentEnrollmentLink">Student Register Form</a></p>
+                </div>
+            </form>
+
+            <form id="studentEnrollmentForm">
+                <h2>Student Register Form</h2>
+
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="person"></ion-icon></span>
+                    <input type="text" id="enrollmentName" required>
+                    <label for="enrollmentName">Full Name</label>
+                </div>
+
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="book"></ion-icon></span>
+                    <select id="enrollmentProgram" required>
+                        <option value="">Select Program</option>
+                        <option value="BSIT">BSIT</option>
+                        <option value="TOURISM">TOURISM</option>
+                        <option value="CRIMINOLOGY">CRIMINOLOGY</option>
+                    </select>
+                    <label for="enrollmentProgram">Program</label>
+                </div>
+
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="home"></ion-icon></span>
+                    <input type="text" id="enrollmentAddress" required>
+                    <label for="enrollmentAddress">Address</label>
+                </div>
+
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="call"></ion-icon></span>
+                    <input type="tel" id="enrollmentContact" pattern="[0-9]{10,12}" title="Enter a valid phone number (10-12 digits)" required>
+                    <label for="enrollmentContact">Contact Number</label>
+                </div>
+
+                <div class="input-box gender-select">
+                    <span class="icon"><ion-icon name="transgender"></ion-icon></span>
+                    <label>Gender:</label>
+                    <div class="radio-group">
+                        <input type="radio" id="genderMale" name="enrollmentGender" value="Male" required>
+                        <label for="genderMale">Male</label>
+                        <input type="radio" id="genderFemale" name="enrollmentGender" value="Female">
+                        <label for="genderFemale">Female</label>
+                    </div>
+                </div>
+
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="calendar"></ion-icon></span>
+                    <input type="date" id="enrollmentBirthdate" required>
+                    <label for="enrollmentBirthdate">Date of Birth (dd/mm/yyyy)</label>
+                </div>
+
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="earth"></ion-icon></span>
+                    <input type="text" id="enrollmentBirthplace" required>
+                    <label for="enrollmentBirthplace">Birthplace</label>
+                </div>
+
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="mail"></ion-icon></span>
+                    <input type="email" id="enrollmentEmail" required>
+                    <label for="enrollmentEmail">Email</label>
+                </div>
+
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
+                    <input type="password" id="enrollmentPassword" required>
+                    <label for="enrollmentPassword">Password</label>
+                </div>
+
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
+                    <input type="password" id="enrollmentConfirmPassword" required>
+                    <label for="enrollmentConfirmPassword">Confirm Password</label>
+                </div>
+
+                <button type="submit">Enroll</button>
+                <div class="switch-form-link">
+                    <p>Already have an account? <a href="#" id="showStudentLoginLink">Login</a></p>
+                </div>
+            </form>
+
+            <form id="teacherLoginForm">
+                <h2>Teacher Login</h2>
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="mail"></ion-icon></span>
+                    <input type="email" id="teacherLoginEmail" required>
+                    <label for="teacherLoginEmail">Email</label>
+                </div>
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
+                    <input type="password" id="teacherLoginPassword" required>
+                    <label for="teacherLoginPassword">Password</label>
+                </div>
+                <div class="remember-forgot">
+                    <label><input type="checkbox"> Remember me</label>
+                    <a href="#" class="forgot-password-link" data-user-type="teacher">Forgot Password?</a>
+                </div>
+                <button type="submit">Login</button>
+                <div class="switch-form-link">
+                    <p>Don't have an account? <a href="#" id="showTeacherRegister">Register</a></p>
+                </div>
+            </form>
+
+            <form id="teacherRegisterForm">
+                <h2>Teacher Register</h2>
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="person"></ion-icon></span>
+                    <input type="text" id="teacherRegisterName" required>
+                    <label for="teacherRegisterName">Name</label>
+                </div>
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="mail"></ion-icon></span>
+                    <input type="email" id="teacherRegisterEmail" required>
+                    <label for="teacherRegisterEmail">Email</label>
+                </div>
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
+                    <input type="password" id="teacherRegisterPassword" required>
+                    <label for="teacherRegisterPassword">Password</label>
+                </div>
+                <button type="submit">Register</button>
+                <div class="switch-form-link">
+                    <p>Already have an account? <a href="#" id="showTeacherLoginLink">Login</a></p>
+                </div>
+            </form>
+
+            <form id="forgotPasswordForm">
+                <h2>Forgot Password</h2>
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="mail"></ion-icon></span>
+                    <input type="email" id="forgotPasswordEmail" required>
+                    <label for="forgotPasswordEmail">Email</label>
+                </div>
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
+                    <input type="password" id="forgotPasswordNewPassword" required>
+                    <label for="forgotPasswordNewPassword">New Password</label>
+                </div>
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
+                    <input type="password" id="forgotPasswordConfirmPassword" required>
+                    <label for="forgotPasswordConfirmPassword">Confirm New Password</label>
+                </div>
+                <button type="submit">Reset Password</button>
+                <div class="switch-form-link">
+                    <p><a href="#" id="showAuthFormFromForgot">Back to Login</a></p>
+                </div>
+            </form>
+
+            <p id="authErrorMessage"></p>
+        </div>
+    </div>
+
+  <div id="studentPortal" class="portal-main-container">
+        <header>
+            <h1>Student Portal</h1>
+            <nav>
+                <ul>
+                    <li><a href="#dashboard" class="active-link">Dashboard</a></li>
+                    <li><a href="#ledger">Ledger</a></li>
+                    <li><a href="#receipt">Upload Receipt</a></li>
+                    <li><a href="#profile">Profile</a></li>
+                </ul>
+            </nav>
+            <div class="flex items-center space-x-4">
+                <div id="student-profile-pic-container">
+                    <img id="student-profile-pic" src="" alt="Profile Picture" class="hidden">
+                    <svg id="student-profile-pic-svg" xmlns="http://www.w3.org/2000/svg" class="text-indigo-500" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.93 0 3.5 1.57 3.5 3.5S13.93 12 12 12s-3.5-1.57-3.5-3.5S10.07 5 12 5zm0 14.2c-2.67 0-5.29-1.28-7.32-3.41A8.995 8.995 0 0 1 12 12c.79 0 1.55.15 2.26.44-.01.07-.01.14-.01.21 0 1.93 1.57 3.5 3.5s3.5-1.57 3.5-3.5c0-.07 0-.14-.01-.21A8.995 8.995 0 0 1 12 19.2z"/>
+                    </svg>
+                </div>
+                <input type="file" id="student-profile-pic-input" accept="image/*" class="hidden">
+                <button id="logoutButtonStudent" class="logout-button-student">Logout</button>
+            </div>
+        </header>
+
+
+        <main>
+            <section id="dashboard" class="portal-section active">
+                <div id="dashboard-welcome">
+                    <h2>Welcome, <span id="studentNameDisplay">Student</span>!</h2>
+                    <p class="mt-4 text-gray-700">Here you can view your academic information. Click on an option below to get started:</p>
+                    <div class="dashboard-nav">
+                        <a href="#" id="showGradesLink">GRADES</a>
+                        <a href="#" id="showSubjectsLink">SUBJECTS</a>
+                        <a href="#" id="showScheduleLink">SCHEDULES</a>
+                    </div>
+                </div>
+
+                <div id="grades-view" class="nested-section">
+                    <h3 class="text-xl font-bold mb-4">My Grades</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>1st Sem Grade</th>
+                                    <th>2nd Sem Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody id="student-grades-table-body">
+                                </tbody>
+                        </table>
+                    </div>
+                    <button class="back-to-dashboard mt-4">Back to Dashboard</button>
+                </div>
+
+                <div id="subjects-view" class="nested-section">
+                    <h3 class="text-xl font-bold mb-4">My Subjects and Teachers</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Teacher</th>
+                                </tr>
+                            </thead>
+                            <tbody id="student-subjects-table-body">
+                                </tbody>
+                        </table>
+                    </div>
+                    <button class="back-to-dashboard mt-4">Back to Dashboard</button>
+                </div>
+
+                <div id="schedule-view" class="nested-section">
+                    <h3 class="text-xl font-bold mb-4">My Schedule</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Day</th>
+                                    <th>Time</th>
+                                    <th>Room</th>
+                                </tr>
+                            </thead>
+                            <tbody id="student-schedule-table-body">
+                                <tr>
+                                    <td>WEB.DEVELOPMENT</td>
+                                    <td>Monday</td>
+                                    <td>8:00 AM - 10:00 AM</td>
+                                    <td>Room 201</td>
+                                </tr>
+                                <tr>
+                                    <td>SAD</td>
+                                    <td>Tuesday</td>
+                                    <td>10:30 AM - 12:30 PM</td>
+                                    <td>Room 305</td>
+                                </tr>
+                                <tr>
+                                    <td>DBMS2</td>
+                                    <td>Wednesday</td>
+                                    <td>1:00 PM - 3:00 PM</td>
+                                    <td>Room 102</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <button class="back-to-dashboard mt-4">Back to Dashboard</button>
+                </div>
+            </section>
+
+            <section id="ledger" class="portal-section">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>OR Number</th>
+                            <th>Debit</th>
+                            <th>Credit</th>
+                            <th>Balance</th>
+                            <th>Type</th>
+                            <th>Remarks</th>
+                            <th>Term</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </section>
+
+            <section id="receipt" class="portal-section">
+                <form id="receiptForm">
+                    <label for="transactionType">Transaction Type</label>
+                    <select id="transactionType" name="transactionType" required>
+                        <option value="Tuition Fee Payment" selected>Tuition Fee Payment</option>
+                    </select>
+
+                    <label for="transactionDate">* Date of Transaction</label>
+                    <input type="date" id="transactionDate" name="transactionDate" required>
+
+                    <label for="referenceNumber">* Transaction Code/Reference Number</label>
+                    <input type="text" id="referenceNumber" name="referenceNumber" required>
+
+                    <label for="amount">* Amount</label>
+                    <input type="number" id="amount" name="amount" step="0.01" required>
+
+                    <label for="message">Student's Message</label>
+                    <textarea id="message" name="message" rows="3" placeholder="Enter any remarks (optional)"></textarea>
+
+                    <label for="receiptUpload">Drag and drop a file here or click</label>
+                    <input type="file" id="receiptUpload" name="receiptUpload" accept="image/*,application/pdf" required>
+
+                    <button type="submit">Submit</button>
+                </form>
+
+                <h3>Submitted Receipts</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>File</th>
+                            <th>Date Submitted</th>
+                            <th>Date Validated</th>
+                            <th>Transaction Type</th>
+                            <th>Reference Number</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="receiptTableBody">
+                        </tbody>
+                </table>
+            </section>
+
+            <section id="profile" class="portal-section">
+                <p>Here are your enrollment details:</p>
+
+                <div class="profile-display-container">
+                    <h3>Your Enrollment Information</h3>
+                    <div class="profile-item"><strong class="profile-label">Full Name:</strong> <span id="profileName"></span></div>
+                    <div class="profile-item"><strong class="profile-label">Program:</strong> <span id="profileProgram"></span></div>
+                    <div class="profile-item"><strong class="profile-label">Address:</strong> <span id="profileAddress"></span></div>
+                    <div class="profile-item"><strong class="profile-label">Contact No.:</strong> <span id="profileContact"></span></div>
+                    <div class="profile-item"><strong class="profile-label">Gender:</strong> <span id="profileGender"></span></div>
+                    <div class="profile-item"><strong class="profile-label">Date of Birth:</strong> <span id="profileBirthdate"></span></div>
+                    <div class="profile-item"><strong class="profile-label">Birthplace:</strong> <span id="profileBirthplace"></span></div>
+                    <div class="profile-item"><strong class="profile-label">Email:</strong> <span id="profileEmail"></span></div>
+                    <p class="contact-help"> If any information is incorrect, please contact <a href="mailto:registrar@datamex.edu">registrar@datamex.edu</a> </p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>© 2025 Student Portal</p>
+        </footer>
+    </div>
+    <div id="teacherPortal" class="portal-main-container teacher-portal-main-container">
+        <header class="w-full max-w-7xl flex justify-between items-center container-bg p-4 sm:p-6 rounded-2xl shadow-lg mb-8">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Teacher's Portal Dashboard</h1>
+            <div class="flex items-center space-x-4">
+                <div id="profile-pic-container">
+                    <img id="profile-pic" src="" alt="Profile Picture" class="hidden">
+                    <svg id="profile-pic-svg" xmlns="http://www.w3.org/2000/svg" class="text-indigo-500" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.93 0 3.5 1.57 3.5 3.5S13.93 12 12 12s-3.5-1.57-3.5-3.5S10.07 5 12 5zm0 14.2c-2.67 0-5.29-1.28-7.32-3.41A8.995 8.995 0 0 1 12 12c.79 0 1.55.15 2.26.44-.01.07-.01.14-.01.21 0 1.93 1.57 3.5 3.5s3.5-1.57 3.5-3.5c0-.07 0-.14-.01-.21A8.995 8.995 0 0 1 12 19.2z"/>
+                    </svg>
+                </div>
+                <input type="file" id="profile-pic-input" accept="image/*" class="hidden">
+                <button id="logoutButtonTeacher" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-full action-button shadow-md"> Logout </button>
+            </div>
+        </header>
+        <main class="w-full max-w-7xl">
+            <div class="container-bg rounded-2xl shadow-lg p-4 sm:p-6 mb-8">
+                <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">Add a New Student</h2>
+                <div id="student-form-teacher" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="input-group">
+                        <label for="student-id" class="block text-sm mb-1">Student ID</label>
+                        <input type="text" id="student-id" placeholder="e.g., S-1004" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="full-name" class="block text-sm mb-1">Full Name</label>
+                        <input type="text" id="full-name" placeholder="e.g., Alice Johnson" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="section" class="block text-sm mb-1">Section</label>
+                        <input type="text" id="section" placeholder="e.g., Section C" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="subject" class="block text-sm mb-1">Subject</label>
+                        <select id="subject" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <option value="">Select Subject</option>
+                            <option value="SAD">SAD</option>
+                            <option value="DMS2">DBMS2</option>
+                            <option value="ECONOMICS">ECONOMICS</option>
+                            <option value="VALUES">VALUES</option>
+                            <option value="PSYCHOLOGY">PSYCHOLOGY</option>
+                            <option value="COMPUTING">COMPUTING</option>
+                            <option value="WE.DEVELOPMENT">WEB.DEVELOPMENT</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="grade-1st-sem" class="block text-sm mb-1">Grade 1st Sem</label>
+                        <input type="number" id="grade-1st-sem" min="0" max="100" placeholder="e.g., 85" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="grade-2nd-sem" class="block text-sm mb-1">Grade 2nd Sem</label>
+                        <input type="number" id="grade-2nd-sem" min="0" max="100" placeholder="e.g., 90" required>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end">
+                    <button id="add-student-button-teacher" class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-6 rounded-full action-button shadow-md"> Add Student </button>
+                </div>
+            </div>
+            <div class="container-bg rounded-2xl shadow-lg p-4 sm:p-6 overflow-x-auto">
+                <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">Student Roster</h2>
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student ID</th>
+                            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Full Name</th>
+                            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Section</th>
+                            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade 1st Sem</th>
+                            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade 2nd Sem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="grades-table-body">
+                        </tbody>
+                </table>
+            </div>
+            <div class="mt-8 flex justify-center">
+                <button id="save-button-teacher" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-8 rounded-full action-button shadow-md"> Save Grades </button>
+            </div>
+        </main>
+    </div>
+    <div id="message-box-container-teacher" class="hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+        <div id="message-box-teacher" class="bg-white p-6 rounded-lg shadow-xl text-center">
+            <p id="message-content-teacher" class="text-xl font-semibold mb-4"></p>
+            <button id="message-box-close-teacher" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Close</button>
+        </div>
+    </div>
+    <script>
+        // --- Login/Registration Form Elements ---
+        const authContainer = document.getElementById('authContainer');
+        const studentLoginForm = document.getElementById('studentLoginForm');
+        const studentEnrollmentForm = document.getElementById('studentEnrollmentForm');
+        const teacherLoginForm = document.getElementById('teacherLoginForm');
+        const teacherRegisterForm = document.getElementById('teacherRegisterForm');
+        const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+        const showStudentBtn = document.getElementById('showStudent');
+        const showTeacherBtn = document.getElementById('showTeacher');
+        const showStudentEnrollmentLink = document.getElementById('showStudentEnrollmentLink');
+        const showStudentLoginLink = document.getElementById('showStudentLoginLink');
+        const showTeacherRegisterLink = document.getElementById('showTeacherRegister');
+        const showTeacherLoginLink = document.getElementById('showTeacherLoginLink');
+        const forgotPasswordLinks = document.querySelectorAll('.forgot-password-link');
+        const backToLoginLink = document.getElementById('showAuthFormFromForgot');
+        const authErrorMessage = document.getElementById('authErrorMessage');
+
+        // --- Portal Elements ---
+        const studentPortal = document.getElementById('studentPortal');
+        const teacherPortal = document.getElementById('teacherPortal');
+        const portalSections = document.querySelectorAll('#studentPortal .portal-section');
+        const portalNavLinks = document.querySelectorAll('#studentPortal nav ul li a');
+        const studentNameDisplay = document.getElementById('studentNameDisplay');
+        const logoutButtonStudent = document.getElementById('logoutButtonStudent');
+        const logoutButtonTeacher = document.getElementById('logoutButtonTeacher');
+
+        // Student Dashboard Elements
+        const dashboardWelcome = document.getElementById('dashboard-welcome');
+        const gradesView = document.getElementById('grades-view');
+        const subjectsView = document.getElementById('subjects-view');
+        const scheduleView = document.getElementById('schedule-view');
+        const studentGradesTableBody = document.getElementById('student-grades-table-body');
+        const studentSubjectsTableBody = document.getElementById('student-subjects-table-body');
+        const showGradesLink = document.getElementById('showGradesLink');
+        const showSubjectsLink = document.getElementById('showSubjectsLink');
+        const showScheduleLink = document.getElementById('showScheduleLink');
+
+        // Profile Display Elements
+        const profileName = document.getElementById('profileName');
+        const profileProgram = document.getElementById('profileProgram');
+        const profileAddress = document.getElementById('profileAddress');
+        const profileContact = document.getElementById('profileContact');
+        const profileGender = document.getElementById('profileGender');
+        // MODIFIED: Changed from profileBirthMonth to profileBirthdate
+        const profileBirthdate = document.getElementById('profileBirthdate');
+        const profileBirthplace = document.getElementById('profileBirthplace');
+        const profileEmail = document.getElementById('profileEmail');
+
+        // Teacher Portal Elements
+        const addStudentButtonTeacher = document.getElementById('add-student-button-teacher');
+        const saveButtonTeacher = document.getElementById('save-button-teacher');
+        const gradesTableBody = document.getElementById('grades-table-body');
+        const messageBoxTeacher = document.getElementById('message-box-teacher');
+        const messageBoxContentTeacher = document.getElementById('message-content-teacher');
+        const messageBoxCloseTeacher = document.getElementById('message-box-close-teacher');
+        const messageBoxContainerTeacher = document.getElementById('message-box-container-teacher');
+
+        // Student Profile Picture
+        const studentProfilePicContainer = document.getElementById('student-profile-pic-container');
+        const studentProfilePic = document.getElementById('student-profile-pic');
+        const studentProfilePicSvg = document.getElementById('student-profile-pic-svg');
+        const studentProfilePicInput = document.getElementById('student-profile-pic-input');
+
+        // Teacher Profile Picture
+        const profilePicContainer = document.getElementById('profile-pic-container');
+        const profilePic = document.getElementById('profile-pic');
+        const profilePicSvg = document.getElementById('profile-pic-svg');
+        const profilePicInput = document.getElementById('profile-pic-input');
+
+
+        // --- Helper Functions ---
+        const showAuthForm = (formToShow, userType = null) => {
+            const forms = [studentLoginForm, studentEnrollmentForm, teacherLoginForm, teacherRegisterForm, forgotPasswordForm];
+            forms.forEach(form => form.classList.remove('active'));
+            formToShow.classList.add('active');
+            authErrorMessage.style.display = 'none';
+
+            // Update auth toggle buttons
+            showStudentBtn.classList.remove('active');
+            showTeacherBtn.classList.remove('active');
+            if (userType === 'student') {
+                showStudentBtn.classList.add('active');
+            } else if (userType === 'teacher') {
+                showTeacherBtn.classList.add('active');
+            }
+        };
+
+        const togglePortal = (show, userType) => {
+            if (show) {
+                authContainer.style.display = 'none';
+                if (userType === 'student') {
+                    studentPortal.classList.add('active');
+                    teacherPortal.classList.remove('active');
+                    loadStudentDashboard();
+                    updateProfileDisplay();
+                } else if (userType === 'teacher') {
+                    teacherPortal.classList.add('active');
+                    studentPortal.classList.remove('active');
+                    loadTeacherPortal();
+                }
+            } else {
+                authContainer.style.display = 'flex';
+                studentPortal.classList.remove('active');
+                teacherPortal.classList.remove('active');
+                sessionStorage.removeItem('loggedInStudentEmail');
+                sessionStorage.removeItem('loggedInTeacherEmail');
+                showAuthForm(studentLoginForm, 'student'); // Default back to student login
+            }
+        };
+
+        const showMessage = (message, type = 'error') => {
+            authErrorMessage.textContent = message;
+            authErrorMessage.className = `message-display ${type}`;
+            authErrorMessage.style.display = 'block';
+        };
+
+        // This function would be part of a proper login system, but for this localStorage demo, we'll just show the user-entered values
+        const updateProfileDisplay = () => {
+            const loggedInStudentEmail = sessionStorage.getItem('loggedInStudentEmail');
+            if (loggedInStudentEmail) {
+                const students = JSON.parse(localStorage.getItem('students')) || [];
+                const student = students.find(s => s.email === loggedInStudentEmail);
+                if (student) {
+                    profileName.textContent = student.name;
+                    profileProgram.textContent = student.program;
+                    profileAddress.textContent = student.address;
+                    profileContact.textContent = student.contact;
+                    profileGender.textContent = student.gender;
+                    profileBirthdate.textContent = student.birthdate;
+                    profileBirthplace.textContent = student.birthplace;
+                    profileEmail.textContent = student.email;
+                    studentNameDisplay.textContent = student.name;
+                    // Load profile picture
+                    const profilePicData = localStorage.getItem(`profilePic-${loggedInStudentEmail}`);
+                    if (profilePicData) {
+                        studentProfilePic.src = profilePicData;
+                        studentProfilePic.classList.remove('hidden');
+                        studentProfilePicSvg.classList.add('hidden');
+                    } else {
+                        studentProfilePic.classList.add('hidden');
+                        studentProfilePicSvg.classList.remove('hidden');
+                    }
+                }
+            }
+        };
+
+        const getStudentEmailByFullName = (fullName) => {
+            const students = JSON.parse(localStorage.getItem('students')) || [];
+            const student = students.find(s => s.name === fullName);
+            return student ? student.email : null;
+        };
+
+        const getStudentGrades = (studentName) => {
+            const grades = JSON.parse(localStorage.getItem('teacher_grades')) || [];
+            return grades.filter(grade => grade.fullName === studentName);
+        };
+
+        const getSubjectsAndTeachers = (studentName) => {
+            const grades = getStudentGrades(studentName);
+            const teachers = JSON.parse(localStorage.getItem('teachers')) || [];
+            const subjects = grades.map(grade => {
+                const teacher = teachers.find(t => t.name === grade.teacherName);
+                return {
+                    subject: grade.subject,
+                    teacher: grade.teacherName,
+                };
+            });
+            return subjects;
+        };
+
+        const loadStudentDashboard = () => {
+            // Show the welcome message by default
+            const sections = [dashboardWelcome, gradesView, subjectsView, scheduleView];
+            sections.forEach(sec => sec.classList.remove('active'));
+            dashboardWelcome.classList.add('active');
+
+            // Load grades and subjects
+            const loggedInStudentEmail = sessionStorage.getItem('loggedInStudentEmail');
+            if (loggedInStudentEmail) {
+                const student = (JSON.parse(localStorage.getItem('students')) || []).find(s => s.email === loggedInStudentEmail);
+                if (student) {
+                    const studentGrades = getStudentGrades(student.name);
+                    studentGradesTableBody.innerHTML = ''; // Clear previous data
+                    studentGrades.forEach(grade => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${grade.subject}</td>
+                            <td>${grade.grade1stSem}</td>
+                            <td>${grade.grade2ndSem}</td>
+                        `;
+                        studentGradesTableBody.appendChild(row);
+                    });
+
+                    const studentSubjects = getSubjectsAndTeachers(student.name);
+                    studentSubjectsTableBody.innerHTML = ''; // Clear previous data
+                    studentSubjects.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${item.subject}</td>
+                            <td>${item.teacher}</td>
+                        `;
+                        studentSubjectsTableBody.appendChild(row);
+                    });
+                }
+            }
+        };
+
+        const loadTeacherPortal = () => {
+            const loggedInTeacherEmail = sessionStorage.getItem('loggedInTeacherEmail');
+            if (loggedInTeacherEmail) {
+                const teachers = JSON.parse(localStorage.getItem('teachers')) || [];
+                const teacher = teachers.find(t => t.email === loggedInTeacherEmail);
+                if (teacher) {
+                    const profilePicData = localStorage.getItem(`profilePic-${loggedInTeacherEmail}`);
+                    if (profilePicData) {
+                        profilePic.src = profilePicData;
+                        profilePic.classList.remove('hidden');
+                        profilePicSvg.classList.add('hidden');
+                    } else {
+                        profilePic.classList.add('hidden');
+                        profilePicSvg.classList.remove('hidden');
+                    }
+                }
+                populateTeacherGradesTable();
+            }
+        };
+
+        const showTeacherMessageBox = (message) => {
+            messageBoxContentTeacher.textContent = message;
+            messageBoxContainerTeacher.classList.remove('hidden');
+        };
+
+        // Populate table from localStorage
+        const populateTeacherGradesTable = () => {
+            const gradesData = JSON.parse(localStorage.getItem('teacher_grades')) || [];
+            const loggedInTeacherEmail = sessionStorage.getItem('loggedInTeacherEmail');
+            const loggedInTeacherName = (JSON.parse(localStorage.getItem('teachers')) || []).find(t => t.email === loggedInTeacherEmail)?.name;
+            const myGrades = gradesData.filter(grade => grade.teacherName === loggedInTeacherName);
+            gradesTableBody.innerHTML = '';
+            myGrades.forEach(grade => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-3 sm:px-6 py-4 whitespace-nowrap">${grade.studentId}</td>
+                    <td class="px-3 sm:px-6 py-4 whitespace-nowrap">${grade.fullName}</td>
+                    <td class="px-3 sm:px-6 py-4 whitespace-nowrap">${grade.section}</td>
+                    <td class="px-3 sm:px-6 py-4 whitespace-nowrap">${grade.subject}</td>
+                    <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
+                        <input type="number" value="${grade.grade1stSem}" min="0" max="100" class="w-20 text-center border rounded-md">
+                    </td>
+                    <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
+                        <input type="number" value="${grade.grade2ndSem}" min="0" max="100" class="w-20 text-center border rounded-md">
+                    </td>
+                `;
+                gradesTableBody.appendChild(row);
+            });
+        };
+
+        // --- Event Listeners ---
+        showStudentBtn.addEventListener('click', () => showAuthForm(studentLoginForm, 'student'));
+        showTeacherBtn.addEventListener('click', () => showAuthForm(teacherLoginForm, 'teacher'));
+        showStudentEnrollmentLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showAuthForm(studentEnrollmentForm, 'student');
+        });
+        showStudentLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showAuthForm(studentLoginForm, 'student');
+        });
+        showTeacherRegisterLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showAuthForm(teacherRegisterForm, 'teacher');
+        });
+        showTeacherLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showAuthForm(teacherLoginForm, 'teacher');
+        });
+        backToLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showAuthForm(studentLoginForm, 'student'); // Default to student login after reset attempt
+        });
+        forgotPasswordLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const userType = e.target.getAttribute('data-user-type');
+                forgotPasswordForm.setAttribute('data-user-type', userType);
+                showAuthForm(forgotPasswordForm);
+            });
+        });
+
+        // Student Login Form Submission
+        studentLoginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('studentLoginEmail').value;
+            const password = document.getElementById('studentLoginPassword').value;
+            const students = JSON.parse(localStorage.getItem('students')) || [];
+            const student = students.find(s => s.email === email && s.password === password);
+            if (student) {
+                sessionStorage.setItem('loggedInStudentEmail', email);
+                togglePortal(true, 'student');
+                // showMessage('Login successful!', 'success');
+            } else {
+                showMessage('Invalid email or password.');
+            }
+        });
+
+        // Student Enrollment Form Submission
+        studentEnrollmentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('enrollmentName').value;
+            const program = document.getElementById('enrollmentProgram').value;
+            const address = document.getElementById('enrollmentAddress').value;
+            const contact = document.getElementById('enrollmentContact').value;
+            const gender = document.querySelector('input[name="enrollmentGender"]:checked').value;
+            const birthdate = document.getElementById('enrollmentBirthdate').value;
+            const birthplace = document.getElementById('enrollmentBirthplace').value;
+            const email = document.getElementById('enrollmentEmail').value;
+            const password = document.getElementById('enrollmentPassword').value;
+            const confirmPassword = document.getElementById('enrollmentConfirmPassword').value;
+
+            if (password !== confirmPassword) {
+                showMessage('Passwords do not match.');
+                return;
+            }
+            const students = JSON.parse(localStorage.getItem('students')) || [];
+            if (students.find(s => s.email === email)) {
+                showMessage('An account with this email already exists.');
+                return;
+            }
+            students.push({
+                name,
+                program,
+                address,
+                contact,
+                gender,
+                birthdate,
+                birthplace,
+                email,
+                password
+            });
+            localStorage.setItem('students', JSON.stringify(students));
+            showMessage('Student account created successfully! Please log in.', 'success');
+            showAuthForm(studentLoginForm, 'student');
+        });
+
+        // Teacher Login Form Submission
+        teacherLoginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('teacherLoginEmail').value;
+            const password = document.getElementById('teacherLoginPassword').value;
+            const teachers = JSON.parse(localStorage.getItem('teachers')) || [];
+            const teacher = teachers.find(t => t.email === email && t.password === password);
+            if (teacher) {
+                sessionStorage.setItem('loggedInTeacherEmail', email);
+                togglePortal(true, 'teacher');
+            } else {
+                showMessage('Invalid email or password.');
+            }
+        });
+
+        // Teacher Registration Form Submission
+        teacherRegisterForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('teacherRegisterName').value;
+            const email = document.getElementById('teacherRegisterEmail').value;
+            const password = document.getElementById('teacherRegisterPassword').value;
+            const teachers = JSON.parse(localStorage.getItem('teachers')) || [];
+            if (teachers.find(t => t.email === email)) {
+                showMessage('An account with this email already exists.');
+                return;
+            }
+            teachers.push({
+                name,
+                email,
+                password,
+            });
+            localStorage.setItem('teachers', JSON.stringify(teachers));
+            showMessage('Teacher account created successfully! Please log in.', 'success');
+            showAuthForm(teacherLoginForm, 'teacher');
+        });
+
+        // Forgot Password Form Submission
+        forgotPasswordForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('forgotPasswordEmail').value;
+            const newPassword = document.getElementById('forgotPasswordNewPassword').value;
+            const confirmPassword = document.getElementById('forgotPasswordConfirmPassword').value;
+            const userType = forgotPasswordForm.getAttribute('data-user-type');
+
+            if (newPassword !== confirmPassword) {
+                showMessage('New passwords do not match.');
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem(`${userType}s`)) || [];
+            const userIndex = users.findIndex(u => u.email === email);
+
+            if (userIndex > -1) {
+                // Update the password
+                users[userIndex].password = newPassword;
+                localStorage.setItem(`${userType}s`, JSON.stringify(users));
+                showMessage('Password reset successful! You can now log in with your new password.', 'success');
+                setTimeout(() => showAuthForm(userType === 'student' ? studentLoginForm : teacherLoginForm, userType), 2000);
+            } else {
+                showMessage('Email not found.');
+            }
+        });
+
+        // Navigation
+        portalNavLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = e.target.getAttribute('href').substring(1);
+                portalSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                portalNavLinks.forEach(navLink => {
+                    navLink.classList.remove('active-link');
+                });
+                document.getElementById(targetId).classList.add('active');
+                e.target.classList.add('active-link');
+
+                if (targetId === 'dashboard') {
+                    // Reset to the main dashboard view when clicking "Dashboard"
+                    const sections = [dashboardWelcome, gradesView, subjectsView, scheduleView];
+                    sections.forEach(sec => sec.classList.remove('active'));
+                    dashboardWelcome.classList.add('active');
+                    loadStudentDashboard(); // Reload data just in case
+                }
+            });
+        });
+
+        // Dashboard sub-navigation
+        document.querySelectorAll('.dashboard-nav a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = e.target.id.replace('show', '').replace('Link', '').toLowerCase() + '-view';
+                const sections = [dashboardWelcome, gradesView, subjectsView, scheduleView];
+                sections.forEach(sec => sec.classList.remove('active'));
+                document.getElementById(targetId).classList.add('active');
+            });
+        });
+
+        document.querySelectorAll('.back-to-dashboard').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const sections = [dashboardWelcome, gradesView, subjectsView, scheduleView];
+                sections.forEach(sec => sec.classList.remove('active'));
+                dashboardWelcome.classList.add('active');
+            });
+        });
+
+        // Logout
+        logoutButtonStudent.addEventListener('click', () => togglePortal(false, 'student'));
+        logoutButtonTeacher.addEventListener('click', () => togglePortal(false, 'teacher'));
+
+        // Teacher Portal - Add Student
+        addStudentButtonTeacher.addEventListener('click', () => {
+            const studentId = document.getElementById('student-id').value;
+            const fullName = document.getElementById('full-name').value;
+            const section = document.getElementById('section').value;
+            const subject = document.getElementById('subject').value;
+            const grade1stSem = document.getElementById('grade-1st-sem').value;
+            const grade2ndSem = document.getElementById('grade-2nd-sem').value;
+            
+            // Check if the student's full name exists in the student registration data
+            const students = JSON.parse(localStorage.getItem('students')) || [];
+            const studentExists = students.some(s => s.name.toLowerCase() === fullName.toLowerCase());
+            
+            if (!studentId || !fullName || !section || !subject || !grade1stSem || !grade2ndSem) {
+                showTeacherMessageBox('Please fill out all fields to add a student.');
+                return;
+            }
+
+            if (!studentExists) {
+                showTeacherMessageBox('Error: The student with this name is not registered.');
+                return;
+            }
+
+            const gradesData = JSON.parse(localStorage.getItem('teacher_grades')) || [];
+            const newGrade = {
+                studentId,
+                fullName,
+                teacherName: JSON.parse(localStorage.getItem('teachers')).find(t => t.email === sessionStorage.getItem('loggedInTeacherEmail'))?.name || 'Unknown Teacher',
+                section,
+                subject,
+                grade1stSem: parseInt(grade1stSem),
+                grade2ndSem: parseInt(grade2ndSem),
+            };
+
+            gradesData.push(newGrade);
+            localStorage.setItem('teacher_grades', JSON.stringify(gradesData));
+            showTeacherMessageBox('Student and grades added successfully!');
+            populateTeacherGradesTable();
+            // Clear the form
+            document.getElementById('student-form-teacher').querySelectorAll('input, select').forEach(el => el.value = '');
+        });
+
+        // Teacher Portal - Save Grades
+        saveButtonTeacher.addEventListener('click', () => {
+            const loggedInTeacherEmail = sessionStorage.getItem('loggedInTeacherEmail');
+            const loggedInTeacherName = (JSON.parse(localStorage.getItem('teachers')) || []).find(t => t.email === loggedInTeacherEmail)?.name;
+            let gradesData = JSON.parse(localStorage.getItem('teacher_grades')) || [];
+            
+            // Create a temporary object to hold updated grades for the current teacher
+            const updatedGradesByTeacher = [];
+
+            // Get the updated grades from the table
+            const tableRows = gradesTableBody.querySelectorAll('tr');
+            tableRows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const studentId = cells[0].innerText;
+                const fullName = cells[1].innerText;
+                const section = cells[2].innerText;
+                const subject = cells[3].innerText;
+                const grade1stSem = cells[4].querySelector('input').value;
+                const grade2ndSem = cells[5].querySelector('input').value;
+
+                updatedGradesByTeacher.push({
+                    studentId,
+                    fullName,
+                    teacherName: loggedInTeacherName,
+                    section,
+                    subject,
+                    grade1stSem: parseInt(grade1stSem),
+                    grade2ndSem: parseInt(grade2ndSem),
+                });
+            });
+
+            // Filter out grades from the current teacher and then add the new list
+            gradesData = gradesData.filter(grade => grade.teacherName !== loggedInTeacherName);
+            gradesData.push(...updatedGradesByTeacher);
+            
+            localStorage.setItem('teacher_grades', JSON.stringify(gradesData));
+            showTeacherMessageBox('Grades saved successfully!');
+        });
+
+        // Profile Picture Upload Logic
+        studentProfilePicContainer.addEventListener('click', () => {
+            studentProfilePicInput.click();
+        });
+
+        profilePicContainer.addEventListener('click', () => {
+            profilePicInput.click();
+        });
+
+        studentProfilePicInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imgData = e.target.result;
+                    const loggedInStudentEmail = sessionStorage.getItem('loggedInStudentEmail');
+                    localStorage.setItem(`profilePic-${loggedInStudentEmail}`, imgData);
+                    studentProfilePic.src = imgData;
+                    studentProfilePic.classList.remove('hidden');
+                    studentProfilePicSvg.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        profilePicInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imgData = e.target.result;
+                    const loggedInTeacherEmail = sessionStorage.getItem('loggedInTeacherEmail');
+                    localStorage.setItem(`profilePic-${loggedInTeacherEmail}`, imgData);
+                    profilePic.src = imgData;
+                    profilePic.classList.remove('hidden');
+                    profilePicSvg.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Close teacher message box
+        messageBoxCloseTeacher.addEventListener('click', () => {
+            messageBoxContainerTeacher.classList.add('hidden');
+        });
+
+
+        // --- Initial Page Load Logic ---
+        document.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('loggedInStudentEmail')) {
+                togglePortal(true, 'student');
+            } else if (sessionStorage.getItem('loggedInTeacherEmail')) {
+                togglePortal(true, 'teacher');
+            }
+            else {
+                showAuthForm(studentLoginForm, 'student');
+            }
+        });
+    </script>
+</body>
+</html>
